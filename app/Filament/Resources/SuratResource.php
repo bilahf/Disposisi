@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Auth;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Surat;
@@ -30,12 +31,18 @@ class SuratResource extends Resource
         return $form
             ->schema([
                 FileUpload::make('file')
-                ->downloadable(),
+                    ->downloadable(),
                 Select::make('mahasiswa_id')
-                ->relationship('mahasiswa','nama'),
+                ->disabled(function () {
+                    return !Auth::user()->hasRole('mahasiswa');
+                })
+                    ->relationship('mahasiswa', 'nama'),
 
                 Forms\Components\Select::make('jenis_surat')
                     ->label('Jenis Surat')
+                    ->disabled(function () {
+                        return !Auth::user()->hasRole('mahasiswa');
+                    })
                     ->options([
                         'Keterangan Aktif Kuliah' => 'Keterangan Aktif Kuliah',
                         'Izin Magang' => 'Izin Magang',
@@ -44,7 +51,21 @@ class SuratResource extends Resource
                     ->reactive()  // Mengubah form sesuai pilihan jenis surat
                     ->required(),
 
+                Forms\Components\Select::make('status')
+                    ->label('Status Surat')
+                    ->disabled(function () {
+                        return !Auth::user()->hasRole('staff');
+                    })
+                    ->options([
+                        'Menunggu' => 'Menunggu',
+                        'Diproses' => 'Diproses',
+                        'Disetujui' => 'Disetujui',
+                        'Ditolak' => 'Ditolak',
+                    ]),
                 Forms\Components\Fieldset::make('Detail Surat')
+                ->disabled(function () {
+                    return !Auth::user()->hasRole('mahasiswa');
+                })
                     ->schema(function ($get) {
                         if ($get('jenis_surat') === 'Keterangan Aktif Kuliah') {
                             return [
@@ -91,7 +112,7 @@ class SuratResource extends Resource
                     ->readOnly()  // Otomatis set ke tanggal saat ini
                     ->required(),
 
-                    
+
             ]);
     }
 
@@ -100,8 +121,8 @@ class SuratResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('mahasiswa.nama')
-                ->sortable()
-                ->label('Mahasiswa'),
+                    ->sortable()
+                    ->label('Mahasiswa'),
                 Tables\Columns\TextColumn::make('jenis_surat')->label('Jenis Surat'),
                 Tables\Columns\TextColumn::make('tanggal_pengajuan')->label('Tanggal Pengajuan'),
                 Tables\Columns\TextColumn::make('status')->label('Status'),
