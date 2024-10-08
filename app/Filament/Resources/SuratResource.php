@@ -7,6 +7,7 @@ use Filament\Forms;
 use Filament\Tables;
 use App\Models\Surat;
 use Filament\Forms\Form;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
@@ -14,6 +15,7 @@ use Filament\Forms\Components\Actions;
 use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Resources\SuratResource\Pages;
@@ -33,9 +35,11 @@ class SuratResource extends Resource
                 FileUpload::make('file')
                     ->downloadable(),
                 Select::make('mahasiswa_id')
-                ->disabled(function () {
-                    return !Auth::user()->hasRole('mahasiswa');
-                })
+                    ->disabled(function () {
+                        return !Auth::user()->hasRole('mahasiswa');
+                    })
+                    ->disabled()
+                    ->default(Auth::user()->mahasiswa?->id)
                     ->relationship('mahasiswa', 'nama'),
 
                 Forms\Components\Select::make('jenis_surat')
@@ -54,18 +58,39 @@ class SuratResource extends Resource
                 Forms\Components\Select::make('status')
                     ->label('Status Surat')
                     ->disabled(function () {
-                        return !Auth::user()->hasRole('staff');
+                        return !Auth::user()->hasRole(['staff', 'kaprodi']);
                     })
-                    ->options([
-                        'Menunggu' => 'Menunggu',
-                        'Diproses' => 'Diproses',
-                        'Disetujui' => 'Disetujui',
-                        'Ditolak' => 'Ditolak',
-                    ]),
+                    ->options(function () {
+                        $user = Auth::user();
+
+                        if ($user->hasRole('staff')) {
+                            return [
+                                'Menunggu' => 'Menunggu',
+                                'Diproses' => 'Diproses',
+                                'Ditolak' => 'Ditolak',
+
+                            ];
+                        }
+                        if ($user->hasRole('kaprodi')) {
+                            return [
+                                'Diproses' => 'Diproses',
+                                'Disetujui' => 'Disetujui',
+                                'Ditolak' => 'Ditolak',
+                            ];
+
+                        }
+
+                        return [
+                            'Menunggu' => 'Menunggu',
+                            'Diproses' => 'Diproses',
+                            'Disetujui' => 'Disetujui',
+                            'Ditolak' => 'Ditolak',
+                        ];
+                    }),
                 Forms\Components\Fieldset::make('Detail Surat')
-                ->disabled(function () {
-                    return !Auth::user()->hasRole('mahasiswa');
-                })
+                    ->disabled(function () {
+                        return !Auth::user()->hasRole('mahasiswa');
+                    })
                     ->schema(function ($get) {
                         if ($get('jenis_surat') === 'Keterangan Aktif Kuliah') {
                             return [
@@ -124,7 +149,8 @@ class SuratResource extends Resource
                     ->sortable()
                     ->label('Mahasiswa'),
                 Tables\Columns\TextColumn::make('jenis_surat')->label('Jenis Surat'),
-                Tables\Columns\TextColumn::make('tanggal_pengajuan')->label('Tanggal Pengajuan'),
+                Tables\Columns\TextColumn::make('tanggal_pengajuan')->label('Tanggal Pengajuan')
+                    ->date(),
                 Tables\Columns\TextColumn::make('status')->label('Status'),
 
                 Tables\Columns\TextColumn::make('created_at')->label('Tanggal Dibuat'),
@@ -133,8 +159,18 @@ class SuratResource extends Resource
 
             ])
             ->filters([
-                // Filter status surat, misalnya Menunggu, Disetujui, Ditolak
+                SelectFilter::make('status')
+                    ->options([
+                        'Menunggu' => 'Menunggu',
+                        'Diproses' => 'Diproses',
+                        'Disetujui' => 'Disetujui',
+                        'Ditolak' => 'Ditolak',
+                    ])
             ])
+            ->groups([
+                Group::make('status')
+            ])
+            ->defaultGroup('status')
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
@@ -156,5 +192,22 @@ class SuratResource extends Resource
             'create' => Pages\CreateSurat::route('/create'),
             'edit' => Pages\EditSurat::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+        if ($user->hasRole('mahasiswa')) {
+            return parent::getEloquentQuery()
+                ->whereHas('mahasiswa.user', function ($query) use ($user) {
+                    $query->where('id', $user->id);
+                });
+        }
+        if ($user->hasRole('kaprodi')) {
+            return parent::getEloquentQuery()
+                ->where('status', 'Diproses');
+        }
+
+        return parent::getEloquentQuery();
     }
 }

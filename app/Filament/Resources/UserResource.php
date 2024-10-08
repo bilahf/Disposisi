@@ -8,6 +8,7 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -21,6 +22,11 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Only allow specific roles (e.g., 'staff', 'kaprodi', 'admin') to see the menu
+        return Auth::user()->hasAnyRole(['staff', 'admin']);
+    }
 
     public static function form(Form $form): Form
     {
