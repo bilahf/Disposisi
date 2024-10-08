@@ -203,8 +203,21 @@ class SuratResource extends Resource
                     $query->where('id', $user->id);
                 });
         }
-        if ($user->hasRole('kaprodi')) {
+        if (
+            $user->hasRole([
+                'Kaprodi Teknik Informatika',
+                'Kaprodi Teknik Elektro',
+                'Kaprodi Teknik Kimia',
+                'Kaprodi Teknik Industri'
+            ])
+        ) {
+            $prodi = $user
+                ->getRoleNames()
+                ->map(fn($item) =>
+                    str_replace('Kaprodi ', '', $item))
+                ->toArray();
             return parent::getEloquentQuery()
+                ->whereHas('mahasiswa', fn($query) => $query->whereIn('prodi', $prodi))
                 ->where('status', 'Diproses');
         }
 
