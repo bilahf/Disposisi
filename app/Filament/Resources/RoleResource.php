@@ -24,7 +24,7 @@ class RoleResource extends Resource
     public static function shouldRegisterNavigation(): bool
     {
         // Only allow specific roles (e.g., 'staff', 'kaprodi', 'admin') to see the menu
-        return Auth::user()->hasAnyRole(['staff', 'admin']);
+        return Auth::user()->hasAnyRole(['admin']);
     }
 
     public static function form(Form $form): Form

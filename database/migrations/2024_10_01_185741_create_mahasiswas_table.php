@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');  // Relasi dengan tabel users
             $table->string('nim')->unique();
             $table->string('nama');
-            $table->string('prodi');
+            $table->enum('prodi', ['Teknik Elektro', 'Teknik Informatika', 'Teknik Mesin']);
             $table->string('email')->unique();
             $table->timestamps();
 

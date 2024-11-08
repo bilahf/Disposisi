@@ -58,7 +58,12 @@ class SuratResource extends Resource
                 Forms\Components\Select::make('status')
                     ->label('Status Surat')
                     ->disabled(function () {
-                        return !Auth::user()->hasRole(['staff', 'kaprodi']);
+                        return !Auth::user()->hasRole(['staff', 'kaprodi',
+                            'Kaprodi Teknik Informatika',
+                            'Kaprodi Teknik Elektro',
+                            'Kaprodi Teknik Kimia',
+                            'Kaprodi Teknik Industri'
+                        ]);
                     })
                     ->options(function () {
                         $user = Auth::user();
@@ -71,7 +76,12 @@ class SuratResource extends Resource
 
                             ];
                         }
-                        if ($user->hasRole('kaprodi')) {
+                        if ($user->hasRole([
+                            'Kaprodi Teknik Informatika',
+                            'Kaprodi Teknik Elektro',
+                            'Kaprodi Teknik Kimia',
+                            'Kaprodi Teknik Industri'
+                        ])) {
                             return [
                                 'Diproses' => 'Diproses',
                                 'Disetujui' => 'Disetujui',

@@ -49,7 +49,12 @@ class MahasiswaResource extends Resource
                 TextInput::make('email'),
                 TextInput::make('no_telpon'),
                 TextInput::make('fakultas'),
-                TextInput::make('prodi'),
+                Select::make('prodi')
+                ->options([
+                    'Teknik Informatika' => 'Teknik Informatika',
+                    'Teknik Elektro' => 'Teknik Elektro',
+                    'Teknik Mesin' => 'Teknik Mesin',
+                ]),
                 TextInput::make('angkatan'),
                 Select::make('status_aktif')
                     ->options([
