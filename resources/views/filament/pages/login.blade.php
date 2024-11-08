@@ -1,5 +1,5 @@
 <div>
-    <div class="min-h-screen bg-white dark:bg-slate-800 dark:text-white p-3">
+    <div class="min-h-screen bg-white dark:bg-slate-800 dark:!text-white p-3">
         <div class="h-[20vh]"></div>
         @if (filament()->hasRegistration())
             <x-slot name="subheading">
