@@ -23,10 +23,10 @@
         @endif
 
         <title>
-            {{-- {{ filled($title = strip_tags($livewire->getTitle())) ? "{$title} - " : null }}
-            {{ filament()->getBrandName() }} --}}
+            {{ filled($title = strip_tags($livewire->getTitle())) ? "{$title} - " : null }}
+            {{ filament()->getBrandName() }}
 
-            {{isset($title) ? $title : "Laravel"}}
+            {{isset($title) ? $title : "Disposisi"}}
         </title>
 
         {{ \Filament\Support\Facades\FilamentView::renderHook('panels::styles.before') }}

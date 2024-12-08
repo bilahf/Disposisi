@@ -21,7 +21,8 @@ class MahasiswaResource extends Resource
 {
     protected static ?string $model = Mahasiswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationGroup = 'Pengguna';
     public static function shouldRegisterNavigation(): bool
     {
         // Only allow specific roles (e.g., 'staff', 'kaprodi', 'admin') to see the menu

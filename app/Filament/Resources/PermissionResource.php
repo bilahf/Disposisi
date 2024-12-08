@@ -18,7 +18,9 @@ class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
+    protected static ?string $navigationGroup = 'Pengaturan';
+
     public static function shouldRegisterNavigation(): bool
     {
         // Only allow specific roles (e.g., 'staff', 'kaprodi', 'admin') to see the menu
